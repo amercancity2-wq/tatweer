@@ -133,7 +133,7 @@
         }
     </style>
 </head>
-<body>
+<body class="dark-mode">
 
     <nav>
         <div class="brand">
@@ -239,7 +239,10 @@
         window.onload = () => {
             renderHalls();
             fillDatesAndTime();
-            if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+            // التحقق إذا كان المستخدم قد اختار الوضع الفاتح سابقاً، وإلا فالوضع الافتراضي هو الداكن
+            if(localStorage.getItem('theme') === 'light') {
+                document.body.classList.remove('dark-mode');
+            }
         };
 
         function renderHalls() {
@@ -323,5 +326,4 @@
         }
     </script>
 </body>
-
 </html>
