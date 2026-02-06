@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>حجز القاعات الدراسية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-sec: #64748b;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 16px;
+        }
+
+        body.dark-mode {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-sec: #94a3b8;
+            --border: #334155;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-color); color: var(--text-main); transition: background 0.3s ease; padding-bottom: 40px; }
+
+        /* Navbar */
+        nav {
+            background: var(--card-bg); border-bottom: 1px solid var(--border);
+            padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-sm);
+        }
+        .brand { font-size: 1.2rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        
+        .theme-toggle {
+            background: transparent; border: 1px solid var(--border); color: var(--text-main);
+            width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.2s;
+        }
+        .theme-toggle:active { transform: scale(0.95); }
+
+        /* Main Layout */
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        .header-text { text-align: center; margin: 30px 0; }
+        .header-text h1 { font-size: 1.8rem; margin-bottom: 10px; }
+        .header-text p { color: var(--text-sec); font-size: 1rem; }
+
+        /* Grid System */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        /* Card Style */
+        .card {
+            background: var(--card-bg); border-radius: var(--radius); padding: 25px;
+            border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--primary); }
+
+        .icon-box {
+            width: 70px; height: 70px; background: rgba(59, 130, 246, 0.1);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; color: var(--primary); margin-bottom: 15px;
+        }
+
+        .card h3 { font-size: 1.2rem; margin-bottom: 8px; }
+        .card p { color: var(--text-sec); margin-bottom: 20px; font-weight: 500; }
+
+        .btn {
+            width: 100%; padding: 14px; border-radius: 12px; border: none;
+            background: var(--primary); color: white; font-weight: 700; font-size: 1rem;
+            cursor: pointer; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn:hover { background: var(--primary-dark); }
+        .btn:active { transform: scale(0.98); }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.2s ease-out; }
+
+        .modal {
+            background: var(--card-bg); width: 100%; max-width: 450px;
+            border-radius: 20px; padding: 25px; position: relative;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            max-height: 90vh; overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute; left: 20px; top: 20px; background: none; border: none;
+            font-size: 1.5rem; color: var(--text-sec); cursor: pointer;
+        }
+
+        .form-group { margin-bottom: 16px; }
+        .form-label { display: block; margin-bottom: 8px; font-size: 0.9rem; font-weight: 700; }
+        
+        .input-field {
+            width: 100%; padding: 14px; border-radius: 12px;
+            border: 1px solid var(--border); background: var(--bg-color);
+            color: var(--text-main); font-size: 1rem;
+        }
+        .input-field:focus { outline: 2px solid var(--primary); border-color: transparent; }
+
+        .flex-row { display: flex; gap: 10px; }
+
+        .msg-box {
+            margin-top: 15px; padding: 12px; border-radius: 8px;
+            background: #dcfce7; color: #166534; text-align: center; font-weight: bold;
+            display: none; border: 1px solid #86efac;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: 1fr; }
+            .header-text h1 { font-size: 1.5rem; }
+            .modal { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="brand">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span>منصة الحجز</span>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <i class="fa-solid fa-moon" id="theme-icon"></i>
+        </button>
+    </nav>
+
+    <div class="container">
+        <div class="header-text">
+            <h1>اختر القاعة المناسبة</h1>
+            <p>سجل طلبك وسيتم مراجعته والتواصل معك</p>
+        </div>
+
+        <div class="grid" id="halls-container"></div>
+    </div>
+
+    <div class="modal-overlay" id="modal">
+        <div class="modal">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            <h2 style="margin-bottom: 20px; text-align: center;">تأكيد الحجز</h2>
+            <h4 id="selected-hall" style="text-align: center; color: var(--primary); margin-bottom: 25px;"></h4>
+            
+            <input type="hidden" id="h-id">
+            <input type="hidden" id="h-name">
+
+            <div class="form-group">
+                <label class="form-label">الاسم</label>
+                <input type="text" id="c-name" class="input-field" placeholder="ادخل اسمك هنا">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">رقم الهاتف</label>
+                <input type="tel" id="c-phone" class="input-field" placeholder="01xxxxxxxxx">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">التاريخ</label>
+                <div class="flex-row">
+                    <select id="date-day" class="input-field"></select>
+                    <select id="date-month" class="input-field" style="flex: 2;">
+                        <option value="" disabled selected>الشهر</option>
+                        <option value="1">يناير</option><option value="2">فبراير</option>
+                        <option value="3">مارس</option><option value="4">أبريل</option>
+                        <option value="5">مايو</option><option value="6">يونيو</option>
+                        <option value="7">يوليو</option><option value="8">أغسطس</option>
+                        <option value="9">سبتمبر</option><option value="10">أكتوبر</option>
+                        <option value="11">نوفمبر</option><option value="12">ديسمبر</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">الوقت</label>
+                <div class="flex-row">
+                    <select id="time-hour" class="input-field">
+                        <option value="" disabled selected>الساعة</option>
+                        </select>
+                    <select id="time-period" class="input-field">
+                        <option value="صباحاً">صباحاً (ص)</option>
+                        <option value="مساءً">مساءً (م)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="success-msg" class="msg-box">
+                <i class="fa-solid fa-check-circle"></i> تم إرسال الطلب بنجاح!
+            </div>
+
+            <button class="btn" onclick="sendBooking()" id="submit-btn" style="margin-top: 10px;">
+                إرسال الطلب
+            </button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAAulyGVGHN8SidTVjPXDVU4laH-omlEBU",
+            authDomain: "ramy-zordoky.firebaseapp.com",
+            databaseURL: "https://ramy-zordoky-default-rtdb.firebaseio.com",
+            projectId: "ramy-zordoky",
+            storageBucket: "ramy-zordoky.firebasestorage.app",
+            messagingSenderId: "959249114502",
+            appId: "1:959249114502:web:86bcf59331610aa7fef807"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const halls = [
+            { id: 'h1', name: 'القاعة التعليمية 1', desc: 'سعة: 25 مقعد' },
+            { id: 'h2', name: 'القاعة التعليمية 2', desc: 'سعة: 25 مقعد' },
+            { id: 'h3', name: 'القاعة التعليمية 3', desc: 'سعة: 25 مقعد' },
+            { id: 'h4', name: 'القاعة التعليمية 4', desc: 'سعة: 25 مقعد' },
+            { id: 'studio', name: 'استوديو التصوير', desc: 'تجهيزات كاملة' }
+        ];
+
+        window.onload = () => {
+            renderHalls();
+            fillDatesAndTime();
+            if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+        };
+
+        function renderHalls() {
+            const container = document.getElementById('halls-container');
+            container.innerHTML = halls.map(h => `
+                <div class="card">
+                    <div class="icon-box"><i class="fa-solid fa-chair"></i></div>
+                    <h3>${h.name}</h3>
+                    <p>${h.desc}</p>
+                    <button class="btn" onclick="openModal('${h.id}', '${h.name}')">حجز الآن</button>
+                </div>
+            `).join('');
+        }
+
+        function fillDatesAndTime() {
+            // Days
+            const daySel = document.getElementById('date-day');
+            daySel.innerHTML = '<option value="" disabled selected>اليوم</option>';
+            for(let i=1; i<=31; i++) daySel.innerHTML += `<option value="${i}">${i}</option>`;
+
+            // Hours (1-12)
+            const hourSel = document.getElementById('time-hour');
+            for(let i=1; i<=12; i++) hourSel.innerHTML += `<option value="${i}">${i}</option>`;
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        }
+
+        const modal = document.getElementById('modal');
+        function openModal(id, name) {
+            document.getElementById('h-id').value = id;
+            document.getElementById('h-name').value = name;
+            document.getElementById('selected-hall').innerText = name;
+            document.getElementById('success-msg').style.display = 'none';
+            modal.classList.add('active');
+        }
+        function closeModal() { modal.classList.remove('active'); }
+
+        function sendBooking() {
+            const name = document.getElementById('c-name').value.trim();
+            const phone = document.getElementById('c-phone').value.trim();
+            const day = document.getElementById('date-day').value;
+            const month = document.getElementById('date-month').value;
+            const hour = document.getElementById('time-hour').value;
+            const period = document.getElementById('time-period').value;
+            const hId = document.getElementById('h-id').value;
+            const hName = document.getElementById('h-name').value;
+            const btn = document.getElementById('submit-btn');
+
+            if(!name || !phone || !day || !month || !hour) return alert('يرجى ملء كافة البيانات بما فيها الوقت');
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الإرسال...';
+
+            // تجميع الوقت بالصيغة المطلوبة
+            const fullTime = `${hour}:00 ${period}`;
+
+            db.ref('bookings/pending').push({
+                clientName: name,
+                phone: phone,
+                resourceId: hId,
+                resourceName: hName,
+                date: `${day}/${month}/2024`,
+                time: fullTime, // إضافة الوقت للداتا بيز
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            }).then(() => {
+                document.getElementById('success-msg').style.display = 'block';
+                setTimeout(() => {
+                    closeModal();
+                    document.getElementById('c-name').value = '';
+                    document.getElementById('c-phone').value = '';
+                }, 1500);
+            }).catch(() => {
+                alert('حدث خطأ في الاتصال');
+            }).finally(() => {
+                btn.disabled = false;
+                btn.innerText = 'إرسال الطلب';
+            });
+        }
+    </script>
+</body>
+</html>
